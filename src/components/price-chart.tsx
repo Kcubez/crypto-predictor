@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   ComposedChart,
@@ -10,32 +10,31 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
-} from "recharts";
-import { ChartDataPoint } from "@/lib/price-simulator";
+} from 'recharts';
+import { ChartDataPoint } from '@/lib/price-simulator';
 
 interface PriceChartProps {
   data: ChartDataPoint[];
-  timeframe: "1week";
+  timeframe: '1week';
 }
 
 export function PriceChart({ data, timeframe }: PriceChartProps) {
-  const minPrice = Math.min(...data.map((d) => d.price));
-  const maxPrice = Math.max(...data.map((d) => d.price));
+  // Filter to show ONLY historical data
+  const historicalData = data.filter(d => d.isHistorical);
+
+  const minPrice = Math.min(...historicalData.map(d => d.price));
+  const maxPrice = Math.max(...historicalData.map(d => d.price));
   const padding = (maxPrice - minPrice) * 0.1;
 
-  // Find the index where predictions start
-  const predictionStartIndex = data.findIndex((d) => !d.isHistorical);
-
-  // Create separate data keys for historical and predicted
-  const chartData = data.map((point) => ({
+  // Prepare chart data (historical only)
+  const chartData = historicalData.map((point, index) => ({
     time: point.time,
-    historical: point.isHistorical ? point.price : null,
-    predicted: !point.isHistorical ? point.price : null,
-    // Add connection point
-    connection: point.isHistorical && data[data.indexOf(point) + 1]?.isHistorical === false 
-      ? point.price 
-      : null,
+    price: point.price,
+    index: index, // Add index for tick calculation
   }));
+
+  // Calculate ticks to show every 2 days
+  const ticks = chartData.map((_, index) => index).filter(index => index % 2 === 0); // Every 2nd index
 
   return (
     <div className="w-full h-80">
@@ -57,33 +56,31 @@ export function PriceChart({ data, timeframe }: PriceChartProps) {
           <XAxis
             dataKey="time"
             stroke="#9ca3af"
-            tick={{ fill: "#9ca3af", fontSize: 12 }}
-            tickLine={{ stroke: "#4b5563" }}
+            tick={{ fill: '#9ca3af', fontSize: 12 }}
+            tickLine={{ stroke: '#4b5563' }}
+            ticks={ticks.map(i => chartData[i].time)}
           />
           <YAxis
             stroke="#9ca3af"
-            tick={{ fill: "#9ca3af", fontSize: 12 }}
-            tickLine={{ stroke: "#4b5563" }}
+            tick={{ fill: '#9ca3af', fontSize: 12 }}
+            tickLine={{ stroke: '#4b5563' }}
             domain={[minPrice - padding, maxPrice + padding]}
-            tickFormatter={(value) => `$${value.toLocaleString()}`}
+            tickFormatter={value => `$${value.toLocaleString()}`}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1e293b",
-              border: "1px solid #8b5cf6",
-              borderRadius: "8px",
-              color: "#fff",
+              backgroundColor: '#1e293b',
+              border: '1px solid #8b5cf6',
+              borderRadius: '8px',
+              color: '#fff',
             }}
-            formatter={(value: any, name: string) => {
-              if (value === null) return null;
-              const label = name === "historical" ? "Historical" : "Predicted";
-              return [`$${value.toLocaleString()}`, label];
-            }}
-            labelStyle={{ color: "#9ca3af" }}
+            formatter={(value: any) => [`$${value.toLocaleString()}`, 'Price']}
+            labelStyle={{ color: '#9ca3af' }}
           />
-          
+
           {/* Vertical line separating historical and predicted data */}
-          {predictionStartIndex > 0 && (
+          {/* Not needed if only showing historical */}
+          {/* {predictionStartIndex > 0 && (
             <ReferenceLine
               x={data[predictionStartIndex - 1].time}
               stroke="#fbbf24"
@@ -96,21 +93,22 @@ export function PriceChart({ data, timeframe }: PriceChartProps) {
                 fontSize: 12,
               }}
             />
-          )}
+          )} */}
 
-          {/* Historical data area (purple) */}
+          {/* Historical data area (purple gradient) */}
           <Area
             type="monotone"
-            dataKey="historical"
+            dataKey="price"
             stroke="#8b5cf6"
-            strokeWidth={3}
+            strokeWidth={2}
             fill="url(#colorHistorical)"
             animationDuration={1000}
             connectNulls={false}
           />
-          
+
           {/* Predicted data area (pink) */}
-          <Area
+          {/* Not needed if only showing historical */}
+          {/* <Area
             type="monotone"
             dataKey="predicted"
             stroke="#ec4899"
@@ -118,31 +116,26 @@ export function PriceChart({ data, timeframe }: PriceChartProps) {
             fill="url(#colorPredicted)"
             animationDuration={1000}
             connectNulls={false}
-          />
-          
+          /> */}
+
           {/* Connection line to bridge historical and predicted */}
-          <Line
+          {/* Not needed if only showing historical */}
+          {/* <Line
             type="monotone"
             dataKey="connection"
             stroke="#8b5cf6"
             strokeWidth={3}
             dot={false}
             connectNulls={false}
-          />
+          /> */}
         </ComposedChart>
       </ResponsiveContainer>
-      
+
       {/* Legend */}
       <div className="flex items-center justify-center gap-6 mt-4">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-purple-500 rounded"></div>
           <span className="text-sm text-gray-400">Historical Data (Last 30 Days)</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-pink-500 rounded"></div>
-          <span className="text-sm text-gray-400">
-            AI Prediction (Next 7 days)
-          </span>
         </div>
       </div>
     </div>

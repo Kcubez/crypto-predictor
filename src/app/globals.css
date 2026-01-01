@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -119,27 +119,44 @@
   body {
     @apply bg-background text-foreground;
   }
-  
+
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 10px;
   }
-  
+
   ::-webkit-scrollbar-track {
     background: oklch(0.145 0 0);
   }
-  
+
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.488 0.243 264.376);
+    background: linear-gradient(to bottom, rgb(168, 85, 247), rgb(236, 72, 153));
     border-radius: 5px;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.6 0.3 264.376);
+    background: linear-gradient(to bottom, rgb(147, 51, 234), rgb(219, 39, 119));
   }
-  
+
   /* Smooth Scroll */
   html {
     scroll-behavior: smooth;
+  }
+
+  /* Custom Animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+    opacity: 0;
   }
 }

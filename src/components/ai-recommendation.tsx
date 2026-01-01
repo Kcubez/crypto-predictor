@@ -33,7 +33,7 @@ export function AIRecommendation({
       : "bg-yellow-500/10 border-yellow-500/30";
 
   return (
-    <Card className="mb-6 bg-gradient-to-br from-slate-900/80 to-purple-900/30 border-purple-500/30 backdrop-blur-sm">
+    <Card className="mb-6 bg-linear-to-br from-slate-900/80 to-purple-900/30 border-purple-500/30 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
           AI RECOMMENDATION

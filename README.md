@@ -4,13 +4,13 @@ BTC ကို အတိတ်က ရှိသမျှ ဒေတာတွေပ�
 
 ## 🚀 Features
 
-- **📊 Real-time Price Simulation**: Historical data-based price predictions
-- **⏱️ Multiple Timeframes**: 
-  - 15 Minutes simulation
-  - 1 Hour simulation  
-  - 24 Hours simulation
-- **🤖 AI-Powered Recommendations**: Buy/Sell/Hold signals with entry zones, targets, and stop-loss levels
-- **📈 Interactive Charts**: Beautiful gradient area charts with real-time data
+- **🤖 Automated Daily Predictions**: Cron job runs daily at 6:30 AM Myanmar time to predict tomorrow's BTC price
+- **📊 Prediction History Dashboard**: Track all predictions vs actual prices with filtering (7 days, 1 month, all)
+- **📈 Accuracy Tracking**: Monitor prediction accuracy with detailed statistics
+- **⏱️ Real-time Price Updates**: Automatically updates yesterday's predictions with actual prices
+- **🎯 AI-Powered Analysis**: Advanced technical analysis using Gemini AI
+- **💾 Persistent Storage**: Vercel KV storage for reliable data persistence
+- **📱 Interactive Charts**: Beautiful gradient area charts with real-time data
 - **🌐 Market Context Analysis**: Comprehensive market analysis and insights
 - **🎨 Premium Dark UI**: Modern, responsive design with glassmorphism effects
 
@@ -35,7 +35,7 @@ npm install
 # Setup environment variables
 # Create .env.local file and add:
 # GEMINI_API_KEY=your_gemini_api_key
-# COINMARKETCAP_API_KEY=your_coinmarketcap_api_key
+# CRON_SECRET=your_random_secret_string
 
 # Run development server
 npm run dev
@@ -45,17 +45,27 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🔑 API Keys Setup
 
-### 1. Gemini AI API Key
+### 1. Gemini AI API Key (Required)
+
 1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Create a new API key
 3. Add to `.env.local`: `GEMINI_API_KEY=your_key_here`
 
-### 2. CoinMarketCap API Key (Optional)
-1. Sign up at [CoinMarketCap Pro](https://pro.coinmarketcap.com/account)
-2. Get your free API key (333 calls/day)
-3. Add to `.env.local`: `COINMARKETCAP_API_KEY=your_key_here`
+### 2. Cron Secret (Required for Production)
 
-**Note**: The app uses Binance API by default (free, unlimited). CoinMarketCap is optional for additional features.
+1. Generate a random secret: `openssl rand -base64 32`
+2. Add to `.env.local` for local testing
+3. Add to Vercel environment variables for production
+4. This protects your cron endpoint from unauthorized access
+
+### 3. Storage
+
+- **No database setup needed!**
+- Uses JSON file storage (`data/predictions.json`)
+- Automatically created when app runs
+- Works perfectly with Vercel
+
+**Note**: The app uses Binance API by default (free, unlimited).
 
 ## 🎯 How It Works
 
@@ -64,6 +74,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 The application uses a **Geometric Brownian Motion** model with mean reversion to simulate realistic Bitcoin price movements:
 
 1. **Historical Volatility Patterns**: Different volatility levels for each timeframe
+
    - 15 minutes: 0.3% volatility
    - 1 hour: 0.8% volatility
    - 24 hours: 2% volatility
@@ -99,7 +110,7 @@ The application uses a **Geometric Brownian Motion** model with mean reversion t
 - **Glassmorphism**: Backdrop blur effects for modern aesthetics
 - **Responsive**: Fully responsive design for all devices
 - **Animations**: Smooth transitions and chart animations
-- **Color Coding**: 
+- **Color Coding**:
   - 🟢 Green for bullish signals
   - 🔴 Red for bearish signals
   - 🟡 Yellow for neutral/hold signals
@@ -107,6 +118,7 @@ The application uses a **Geometric Brownian Motion** model with mean reversion t
 ## 📊 Simulation Accuracy
 
 The simulation is based on:
+
 - Historical Bitcoin volatility patterns
 - Statistical models (Geometric Brownian Motion)
 - Market behavior analysis
@@ -120,9 +132,9 @@ The simulation parameters can be adjusted in `src/lib/price-simulator.ts`:
 
 ```typescript
 const VOLATILITY_PATTERNS = {
-  "15min": { volatility: 0.003, dataPoints: 15 },
-  "1hour": { volatility: 0.008, dataPoints: 24 },
-  "24hour": { volatility: 0.02, dataPoints: 48 },
+  '15min': { volatility: 0.003, dataPoints: 15 },
+  '1hour': { volatility: 0.008, dataPoints: 24 },
+  '24hour': { volatility: 0.02, dataPoints: 48 },
 };
 ```
 

@@ -1,0 +1,43 @@
+name: Daily BTC Prediction
+
+on:
+  schedule:
+    # TEST: Runs at UTC 08:30 (Thai 3:30 PM) - CHANGE BACK TO 23:00 AFTER TESTING!
+    - cron: '30 8 * * *'
+
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  generate-prediction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install @google/genai
+          npm install @prisma/client
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Run Prediction Script
+        run: node .github/scripts/generate-prediction.js
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Notify completion
+        run: echo "✅ Prediction generated successfully!"
