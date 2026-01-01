@@ -11,12 +11,14 @@ const ai = new GoogleGenAI({
 
 // Your Vercel app URL (replace with actual URL)
 const VERCEL_URL = process.env.VERCEL_URL || 'https://your-app.vercel.app';
+const PROXY_API_KEY = process.env.BINANCE_PROXY_KEY || 'default-secret-key';
 
 // Fetch via Vercel proxy
 async function fetchViaProxy(endpoint, params = {}) {
   const fetch = (await import('node-fetch')).default;
 
   const queryParams = new URLSearchParams({
+    key: PROXY_API_KEY, // Add API key for security
     endpoint,
     ...params,
   });

@@ -5,7 +5,11 @@ import { jwtVerify } from 'jose';
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-key');
 
 // Public routes that don't require authentication
-const publicRoutes = ['/login', '/api/auth/login'];
+const publicRoutes = [
+  '/login',
+  '/api/auth/login',
+  '/api/binance/proxy', // Allow GitHub Actions to access Binance proxy
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
