@@ -61,15 +61,27 @@ async function fetchHistoricalData(days = 1000) {
   }));
 }
 
-// Fetch current BTC price via Vercel proxy
-async function fetchCurrentPrice() {
-  console.log('Fetching current BTC price via Vercel...');
+// Fetch yesterday's closing price (for accurate prediction tracking)
+async function fetchYesterdayClosingPrice() {
+  console.log("Fetching yesterday's closing price via Vercel...");
 
-  const data = await fetchViaProxy('price', {
+  // Fetch last 2 days of candles
+  const data = await fetchViaProxy('klines', {
     symbol: 'BTCUSDT',
+    interval: '1d',
+    limit: '2',
   });
 
-  return parseFloat(data.price);
+  if (!data || data.length < 2) {
+    throw new Error('Not enough historical data to get yesterday closing price');
+  }
+
+  // Get yesterday's candle (second to last)
+  const yesterdayCandle = data[data.length - 2];
+  const closingPrice = parseFloat(yesterdayCandle[4]); // Index 4 = close price
+
+  console.log(`✅ Yesterday's closing price: $${closingPrice}`);
+  return closingPrice;
 }
 
 // Generate prediction using Gemini AI
@@ -146,7 +158,7 @@ async function main() {
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 
     try {
-      const actualPrice = await fetchCurrentPrice();
+      const actualPrice = await fetchYesterdayClosingPrice();
 
       const prediction = await prisma.prediction.findFirst({
         where: {
