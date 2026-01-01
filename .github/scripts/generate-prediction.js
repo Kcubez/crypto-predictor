@@ -1,5 +1,5 @@
 // GitHub Actions script to generate daily BTC prediction
-// This runs independently of Vercel, avoiding the 10-second timeout
+// Uses Vercel proxy to bypass Binance IP block
 
 const { GoogleGenAI } = require('@google/genai');
 const { PrismaClient } = require('@prisma/client');
@@ -9,37 +9,45 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-// Fetch with retry logic
-async function fetchWithRetry(url, retries = 3) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      // Use dynamic import for node-fetch
-      const fetch = (await import('node-fetch')).default;
-      const response = await fetch(url);
+// Your Vercel app URL (replace with actual URL)
+const VERCEL_URL = process.env.VERCEL_URL || 'https://your-app.vercel.app';
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+// Fetch via Vercel proxy
+async function fetchViaProxy(endpoint, params = {}) {
+  const fetch = (await import('node-fetch')).default;
 
-      return await response.json();
-    } catch (error) {
-      console.log(`Attempt ${i + 1}/${retries} failed:`, error.message);
-      if (i === retries - 1) throw error;
-      // Wait before retry
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
+  const queryParams = new URLSearchParams({
+    endpoint,
+    ...params,
+  });
+
+  const url = `${VERCEL_URL}/api/binance/proxy?${queryParams}`;
+  console.log('Fetching via Vercel proxy:', endpoint);
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Proxy error: ${response.status}`);
   }
+
+  const result = await response.json();
+
+  if (!result.success) {
+    throw new Error(result.error || 'Proxy request failed');
+  }
+
+  return result.data;
 }
 
-// Fetch Bitcoin historical data from Binance
+// Fetch Bitcoin historical data via Vercel proxy
 async function fetchHistoricalData(days = 1000) {
-  const endTime = Date.now();
-  const startTime = endTime - days * 24 * 60 * 60 * 1000;
+  console.log(`Fetching ${days} days of historical data via Vercel...`);
 
-  console.log('Fetching from Binance API...');
-  const data = await fetchWithRetry(
-    `https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&startTime=${startTime}&endTime=${endTime}&limit=${days}`
-  );
+  const data = await fetchViaProxy('klines', {
+    symbol: 'BTCUSDT',
+    interval: '1d',
+    limit: days.toString(),
+  });
 
   return data.map(candle => ({
     time: candle[0],
@@ -51,10 +59,14 @@ async function fetchHistoricalData(days = 1000) {
   }));
 }
 
-// Fetch current BTC price
+// Fetch current BTC price via Vercel proxy
 async function fetchCurrentPrice() {
-  console.log('Fetching current BTC price...');
-  const data = await fetchWithRetry('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+  console.log('Fetching current BTC price via Vercel...');
+
+  const data = await fetchViaProxy('price', {
+    symbol: 'BTCUSDT',
+  });
+
   return parseFloat(data.price);
 }
 
@@ -63,7 +75,7 @@ async function generatePrediction(historicalData) {
   const currentPrice = historicalData[historicalData.length - 1].close;
 
   const dataString = historicalData
-    .slice(-100) // Only use last 100 candles for prompt (to avoid token limit)
+    .slice(-100)
     .map(
       (c, i) =>
         `${i + 1}. Close: $${c.close}, High: $${c.high}, Low: $${c.low}, Volume: $${c.volume}`
@@ -100,6 +112,8 @@ RESPOND IN THIS EXACT JSON FORMAT (no markdown, just raw JSON):
   "marketContext": "Market analysis summary..."
 }`;
 
+  console.log('Calling Gemini AI (this may take 4 minutes)...');
+
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
     contents: prompt,
@@ -122,7 +136,7 @@ RESPOND IN THIS EXACT JSON FORMAT (no markdown, just raw JSON):
 // Main function
 async function main() {
   try {
-    console.log('🤖 Starting daily prediction...');
+    console.log('🤖 Starting daily prediction via Vercel proxy...');
 
     // Step 1: Update yesterday's prediction
     const yesterday = new Date();
@@ -160,16 +174,15 @@ async function main() {
       }
     } catch (error) {
       console.error("Error updating yesterday's prediction:", error.message);
-      // Continue even if this fails
     }
 
-    // Step 2: Fetch historical data
-    console.log('📊 Fetching historical data...');
+    // Step 2: Fetch historical data via Vercel
+    console.log('📊 Fetching historical data via Vercel proxy...');
     const historicalData = await fetchHistoricalData(1000);
     console.log(`✅ Fetched ${historicalData.length} candles`);
 
     // Step 3: Generate new prediction
-    console.log('🔮 Generating prediction for tomorrow (this may take 4 minutes)...');
+    console.log('🔮 Generating prediction for tomorrow...');
     const prediction = await generatePrediction(historicalData);
     console.log('✅ AI prediction generated');
 

@@ -39,6 +39,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VERCEL_URL: ${{ secrets.VERCEL_URL }}
 
       - name: Notify completion
         run: echo "✅ Prediction generated successfully!"
