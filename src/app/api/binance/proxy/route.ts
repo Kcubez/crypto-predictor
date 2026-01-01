@@ -21,6 +21,12 @@ export async function GET(request: NextRequest) {
     const apiKey = searchParams.get('key');
     const validKey = process.env.BINANCE_PROXY_KEY || 'default-secret-key';
 
+    console.log('🔑 API Key check:', {
+      provided: apiKey ? 'YES' : 'NO',
+      valid: apiKey === validKey,
+      envVarSet: !!process.env.BINANCE_PROXY_KEY,
+    });
+
     if (apiKey !== validKey) {
       console.log('❌ Invalid API key');
       return NextResponse.json(
@@ -69,10 +75,15 @@ export async function GET(request: NextRequest) {
     );
   } catch (error: any) {
     console.error('❌ Binance proxy error:', error);
+    console.error('Error stack:', error.stack);
     return NextResponse.json(
       {
         success: false,
         error: error.message || 'Failed to fetch from Binance',
+        details: {
+          message: error.message,
+          stack: error.stack?.split('\n')[0], // First line of stack
+        },
       },
       { status: 500, headers }
     );

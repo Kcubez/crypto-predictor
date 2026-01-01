@@ -188,13 +188,25 @@ async function main() {
     const prediction = await generatePrediction(historicalData);
     console.log('✅ AI prediction generated');
 
-    // Step 4: Save to database
+    // Step 4: Get admin user for automated predictions
+    const adminUser = await prisma.user.findFirst({
+      where: { email: 'admin@crypto.com' },
+    });
+
+    if (!adminUser) {
+      throw new Error('Admin user not found! Please create admin@crypto.com account first.');
+    }
+
+    console.log('✅ Using admin user for prediction:', adminUser.email);
+
+    // Step 5: Save to database
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
     const saved = await prisma.prediction.create({
       data: {
+        userId: adminUser.id,
         date: new Date().toISOString().split('T')[0],
         targetDate: tomorrowStr,
         predictedPrice: prediction.predictions[0],
