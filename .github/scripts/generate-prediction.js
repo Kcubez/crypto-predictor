@@ -9,20 +9,37 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
+// Fetch with retry logic
+async function fetchWithRetry(url, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      // Use dynamic import for node-fetch
+      const fetch = (await import('node-fetch')).default;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.log(`Attempt ${i + 1}/${retries} failed:`, error.message);
+      if (i === retries - 1) throw error;
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+  }
+}
+
 // Fetch Bitcoin historical data from Binance
 async function fetchHistoricalData(days = 1000) {
   const endTime = Date.now();
   const startTime = endTime - days * 24 * 60 * 60 * 1000;
 
-  const response = await fetch(
+  console.log('Fetching from Binance API...');
+  const data = await fetchWithRetry(
     `https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&startTime=${startTime}&endTime=${endTime}&limit=${days}`
   );
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch historical data');
-  }
-
-  const data = await response.json();
 
   return data.map(candle => ({
     time: candle[0],
@@ -36,13 +53,8 @@ async function fetchHistoricalData(days = 1000) {
 
 // Fetch current BTC price
 async function fetchCurrentPrice() {
-  const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch current price');
-  }
-
-  const data = await response.json();
+  console.log('Fetching current BTC price...');
+  const data = await fetchWithRetry('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
   return parseFloat(data.price);
 }
 
@@ -51,6 +63,7 @@ async function generatePrediction(historicalData) {
   const currentPrice = historicalData[historicalData.length - 1].close;
 
   const dataString = historicalData
+    .slice(-100) // Only use last 100 candles for prompt (to avoid token limit)
     .map(
       (c, i) =>
         `${i + 1}. Close: $${c.close}, High: $${c.high}, Low: $${c.low}, Volume: $${c.volume}`
@@ -61,18 +74,22 @@ async function generatePrediction(historicalData) {
 
 Analyze the Bitcoin historical data and predict the NEXT DAY's closing price (UTC 00:00) with MAXIMUM ACCURACY.
 
-HISTORICAL DATA (${historicalData.length} daily candles):
+HISTORICAL DATA (last 100 daily candles):
 ${dataString}
 
 CURRENT PRICE: $${currentPrice}
 
-[... rest of prompt same as in route.ts ...]
+CRITICAL ANALYSIS (Must Calculate):
+1. **Bollinger Bands (20-day, 2 std dev)**
+2. **Multi-Timeframe Trend**
+3. **Volume Confirmation**
+4. **Key Technical Indicators**
 
 RESPOND IN THIS EXACT JSON FORMAT (no markdown, just raw JSON):
 {
   "predictions": [93500.50],
   "confidence": 82,
-  "reasoning": "...",
+  "reasoning": "Detailed technical analysis...",
   "trend": "bullish",
   "recommendation": {
     "action": "BUY",
@@ -80,7 +97,7 @@ RESPOND IN THIS EXACT JSON FORMAT (no markdown, just raw JSON):
     "target": "$94,500",
     "stopLoss": "$91,000"
   },
-  "marketContext": "..."
+  "marketContext": "Market analysis summary..."
 }`;
 
   const response = await ai.models.generateContent({
@@ -138,18 +155,23 @@ async function main() {
         });
 
         console.log(`✅ Updated yesterday's prediction with actual price: $${actualPrice}`);
+      } else {
+        console.log('No pending prediction found for yesterday');
       }
     } catch (error) {
-      console.error("Error updating yesterday's prediction:", error);
+      console.error("Error updating yesterday's prediction:", error.message);
+      // Continue even if this fails
     }
 
     // Step 2: Fetch historical data
     console.log('📊 Fetching historical data...');
     const historicalData = await fetchHistoricalData(1000);
+    console.log(`✅ Fetched ${historicalData.length} candles`);
 
     // Step 3: Generate new prediction
     console.log('🔮 Generating prediction for tomorrow (this may take 4 minutes)...');
     const prediction = await generatePrediction(historicalData);
+    console.log('✅ AI prediction generated');
 
     // Step 4: Save to database
     const tomorrow = new Date();
@@ -176,7 +198,8 @@ async function main() {
     console.log('✅ Prediction saved to database:', saved.id);
     console.log('✅ Daily prediction completed successfully!');
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Error:', error.message);
+    console.error('Stack:', error.stack);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

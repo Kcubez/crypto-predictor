@@ -2,8 +2,8 @@ name: Daily BTC Prediction
 
 on:
   schedule:
-    # TEST: Runs at UTC 08:30 (Thai 3:30 PM) - CHANGE BACK TO 23:00 AFTER TESTING!
-    - cron: '30 8 * * *'
+    # Runs at UTC 23:00 (Myanmar 6:30 AM) every day
+    - cron: '0 23 * * *'
 
   # Allow manual trigger for testing
   workflow_dispatch:
@@ -26,6 +26,7 @@ jobs:
         run: |
           npm install @google/genai
           npm install @prisma/client
+          npm install node-fetch@2
 
       - name: Generate Prisma Client
         run: npx prisma generate
