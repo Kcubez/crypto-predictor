@@ -87,44 +87,77 @@ async function fetchYesterdayClosingPrice() {
 // Generate prediction using Gemini AI
 async function generatePrediction(historicalData) {
   const currentPrice = historicalData[historicalData.length - 1].close;
+  const yesterdayPrice = historicalData[historicalData.length - 2].close;
+  const priceChange = ((currentPrice - yesterdayPrice) / yesterdayPrice) * 100;
+
+  // Calculate simple moving averages
+  const last7Days = historicalData.slice(-7);
+  const last20Days = historicalData.slice(-20);
+  const sma7 = last7Days.reduce((sum, d) => sum + d.close, 0) / 7;
+  const sma20 = last20Days.reduce((sum, d) => sum + d.close, 0) / 20;
 
   const dataString = historicalData
     .slice(-100)
     .map(
       (c, i) =>
-        `${i + 1}. Close: $${c.close}, High: $${c.high}, Low: $${c.low}, Volume: $${c.volume}`
+        `Day ${i + 1}: Close=$${c.close}, High=$${c.high}, Low=$${c.low}, Vol=$${c.volume.toFixed(
+          2
+        )}`
     )
     .join('\n');
 
-  const prompt = `You are an expert cryptocurrency analyst specializing in Bitcoin price prediction.
+  const prompt = `You are a highly experienced cryptocurrency analyst with 20+ years in financial markets and 10+ years specializing in Bitcoin technical analysis. Your predictions have historically achieved 95%+ accuracy by being CONSERVATIVE and data-driven.
 
-Analyze the Bitcoin historical data and predict the NEXT DAY's closing price (UTC 00:00) with MAXIMUM ACCURACY.
+CRITICAL INSTRUCTIONS:
+1. Be CONSERVATIVE - Don't predict large price swings unless data strongly supports it
+2. Focus on REALISTIC next-day movements (typically 1-3% for Bitcoin)
+3. Consider market consolidation and mean reversion
+4. Avoid overfitting to recent volatility
 
-HISTORICAL DATA (last 100 daily candles):
+CURRENT MARKET STATE:
+- Current Price: $${currentPrice}
+- Yesterday's Price: $${yesterdayPrice}
+- 24h Change: ${priceChange.toFixed(2)}%
+- 7-Day SMA: $${sma7.toFixed(2)}
+- 20-Day SMA: $${sma20.toFixed(2)}
+
+HISTORICAL DATA (Last 100 daily candles, UTC 00:00 close):
 ${dataString}
 
-CURRENT PRICE: $${currentPrice}
+REQUIRED TECHNICAL ANALYSIS:
+1. **Bollinger Bands (20-day, 2 std dev)**: Calculate upper/lower bands, identify if price is overbought/oversold
+2. **RSI (14-day)**: Estimate momentum, check for divergences
+3. **Volume Analysis**: Compare recent volume to 20-day average, identify accumulation/distribution
+4. **Support/Resistance**: Identify key levels from historical data
+5. **Trend Analysis**: Multi-timeframe (7-day, 20-day, 50-day trends)
+6. **Mean Reversion**: Consider if price is extended from moving averages
 
-CRITICAL ANALYSIS (Must Calculate):
-1. **Bollinger Bands (20-day, 2 std dev)**
-2. **Multi-Timeframe Trend**
-3. **Volume Confirmation**
-4. **Key Technical Indicators**
+PREDICTION GUIDELINES:
+- If price is > 2 std dev from mean → Predict reversion toward mean
+- If volume is declining → Predict consolidation (small movement)
+- If near strong support/resistance → Predict bounce/rejection
+- Default to CONSERVATIVE predictions (1-2% moves) unless strong signals
 
 RESPOND IN THIS EXACT JSON FORMAT (no markdown, just raw JSON):
 {
-  "predictions": [93500.50],
-  "confidence": 82,
-  "reasoning": "Detailed technical analysis...",
-  "trend": "bullish",
+  "predictions": [89500.00],
+  "confidence": 75,
+  "reasoning": "Detailed technical analysis with specific numbers from Bollinger Bands, RSI, volume, support/resistance levels, and why this prediction is conservative and realistic...",
+  "trend": "neutral",
   "recommendation": {
-    "action": "BUY",
-    "entryZone": "$92,000 - $93,000",
-    "target": "$94,500",
-    "stopLoss": "$91,000"
+    "action": "HOLD",
+    "entryZone": "$88,500 - $89,000",
+    "target": "$90,000",
+    "stopLoss": "$87,500"
   },
-  "marketContext": "Market analysis summary..."
-}`;
+  "marketContext": "Bitcoin is consolidating after recent volatility. Price is testing 20-day SMA support. Volume is below average, suggesting limited conviction. Conservative prediction favors mean reversion..."
+}
+
+IMPORTANT: 
+- Predicted price should be within 5% of current price unless exceptional circumstances
+- Confidence should reflect uncertainty (70-85% is realistic, not 95%+)
+- Trend should be "neutral" if no clear direction (most common)
+- Be honest about limitations - crypto is volatile and unpredictable`;
 
   console.log('Calling Gemini AI (this may take 4 minutes)...');
 
