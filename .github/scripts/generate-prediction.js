@@ -152,22 +152,29 @@ async function main() {
   try {
     console.log('🤖 Starting daily prediction via Vercel proxy...');
 
-    // Step 1: Update yesterday's prediction
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    // Step 1: Update yesterday's completed prediction
+    // We're looking for the prediction that was made FOR today
+    // (because today's candle just closed)
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
 
     try {
       const actualPrice = await fetchYesterdayClosingPrice();
+      console.log(`📅 Today: ${todayStr}, Looking for prediction with targetDate: ${todayStr}`);
 
+      // Find prediction that was made FOR today
       const prediction = await prisma.prediction.findFirst({
         where: {
-          targetDate: yesterdayStr,
+          targetDate: todayStr, // Prediction FOR today
           status: 'pending',
         },
       });
 
       if (prediction) {
+        console.log(
+          `📍 Found prediction: targetDate=${prediction.targetDate}, predicted=$${prediction.predictedPrice}`
+        );
+
         const difference = Math.round((actualPrice - prediction.predictedPrice) * 100) / 100;
         const percentageError =
           ((actualPrice - prediction.predictedPrice) / prediction.predictedPrice) * 100;
@@ -182,12 +189,16 @@ async function main() {
           },
         });
 
-        console.log(`✅ Updated yesterday's prediction with actual price: $${actualPrice}`);
+        console.log(
+          `✅ Updated prediction for ${prediction.targetDate} with actual price: $${actualPrice}`
+        );
+        console.log(`   Difference: $${difference}, Error: ${percentageError.toFixed(2)}%`);
       } else {
-        console.log('No pending prediction found for yesterday');
+        console.log(`⚠️ No pending prediction found for today (${todayStr})`);
       }
     } catch (error) {
-      console.error("Error updating yesterday's prediction:", error.message);
+      console.error('❌ Error updating prediction:', error.message);
+      console.error(error.stack);
     }
 
     // Step 2: Fetch historical data via Vercel
@@ -211,10 +222,24 @@ async function main() {
 
     console.log('✅ Using admin user for prediction:', adminUser.email);
 
-    // Step 5: Save to database
+    // Step 5: Save to database (check for duplicates first)
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    // Check if prediction for tomorrow already exists
+    const existingPrediction = await prisma.prediction.findFirst({
+      where: {
+        targetDate: tomorrowStr,
+        status: 'pending',
+      },
+    });
+
+    if (existingPrediction) {
+      console.log(`⚠️ Prediction for ${tomorrowStr} already exists (ID: ${existingPrediction.id})`);
+      console.log('✅ Daily prediction completed (skipped duplicate)!');
+      return;
+    }
 
     const saved = await prisma.prediction.create({
       data: {
