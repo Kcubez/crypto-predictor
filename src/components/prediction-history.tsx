@@ -440,13 +440,16 @@ export default function PredictionHistory() {
                     )}
                   </div>
 
-                  <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="w-4 h-4 text-purple-400" />
-                      <p className="text-sm font-medium text-purple-300">AI Reasoning</p>
+                  {/* Only show AI Reasoning for the most recent prediction */}
+                  {index === 0 && (
+                    <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="w-4 h-4 text-purple-400" />
+                        <p className="text-sm font-medium text-purple-300">AI Reasoning</p>
+                      </div>
+                      <p className="text-sm text-gray-300 leading-relaxed">{pred.reasoning}</p>
                     </div>
-                    <p className="text-sm text-gray-300 leading-relaxed">{pred.reasoning}</p>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
