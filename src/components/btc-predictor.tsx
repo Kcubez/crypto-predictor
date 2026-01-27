@@ -9,6 +9,7 @@ import { PriceChart } from './price-chart';
 import { AIRecommendation } from './ai-recommendation';
 import { MarketContext } from './market-context';
 import { LoadingSpinner } from './loading-spinner';
+import { AssetPriceCard } from './asset-price-card';
 import { generatePriceSimulation, SimulationData } from '@/lib/price-simulator';
 // Using Binance API for everything (current price + historical data)
 import {
@@ -132,8 +133,8 @@ export function BTCPredictor() {
             action: (pred.trend === 'bullish'
               ? 'BUY'
               : pred.trend === 'bearish'
-              ? 'SELL'
-              : 'HOLD') as 'BUY' | 'SELL' | 'HOLD',
+                ? 'SELL'
+                : 'HOLD') as 'BUY' | 'SELL' | 'HOLD',
             entryZone: pred.entryZone || '',
             target: pred.target || '',
             stopLoss: pred.stopLoss || '',
@@ -260,21 +261,24 @@ export function BTCPredictor() {
     let lastRefreshDate = new Date().toDateString();
 
     // Check every hour if we need to refresh
-    const historicalInterval = setInterval(() => {
-      const now = new Date();
-      const currentDate = now.toDateString();
+    const historicalInterval = setInterval(
+      () => {
+        const now = new Date();
+        const currentDate = now.toDateString();
 
-      // Get Myanmar time (UTC+6:30)
-      const myanmarHour = (now.getUTCHours() + 6) % 24;
-      const myanmarMinute = now.getUTCMinutes() + 30;
+        // Get Myanmar time (UTC+6:30)
+        const myanmarHour = (now.getUTCHours() + 6) % 24;
+        const myanmarMinute = now.getUTCMinutes() + 30;
 
-      // If it's past 6:30 AM Myanmar time AND we haven't refreshed today
-      if (currentDate !== lastRefreshDate && myanmarHour >= 6 && myanmarMinute >= 30) {
-        console.log('🔄 Daily auto-refresh: New day detected, updating historical data...');
-        fetchHistoricalData();
-        lastRefreshDate = currentDate;
-      }
-    }, 60 * 60 * 1000); // Check every hour
+        // If it's past 6:30 AM Myanmar time AND we haven't refreshed today
+        if (currentDate !== lastRefreshDate && myanmarHour >= 6 && myanmarMinute >= 30) {
+          console.log('🔄 Daily auto-refresh: New day detected, updating historical data...');
+          fetchHistoricalData();
+          lastRefreshDate = currentDate;
+        }
+      },
+      60 * 60 * 1000
+    ); // Check every hour
 
     return () => clearInterval(historicalInterval);
   }, [timeframe]);
@@ -415,7 +419,7 @@ export function BTCPredictor() {
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
-                BTC Predictor
+                Business Dashboard
               </h1>
               <p className="text-xs sm:text-sm text-purple-300">Powered by MOT</p>
             </div>
@@ -463,36 +467,10 @@ export function BTCPredictor() {
           </div>
         </div>
 
-        {/* Current Price Display */}
-        <Card className="mb-6 bg-slate-900/50 border-purple-500/20 backdrop-blur-sm">
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="text-xs sm:text-sm text-gray-400">Current BTC Price</p>
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-500">Live</span>
-                  </div>
-                </div>
-                {isLoadingPrice ? (
-                  <div className="flex items-center gap-3">
-                    <LoadingSpinner size="sm" />
-                    <p className="text-xl text-gray-400">Loading...</p>
-                  </div>
-                ) : (
-                  <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                    $
-                    {currentPrice.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Live Asset Prices - BTC and Gold */}
+        <div className="mb-6">
+          <AssetPriceCard assets={['BTC', 'GOLD']} showRefreshButton={true} />
+        </div>
 
         {/* Price Chart - Only show when prediction exists */}
         {simulationData && (

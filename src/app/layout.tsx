@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'BTC Predictor - AI-Powered Daily Bitcoin Price Prediction',
+  title: 'Business Dashboard - AI-Powered Daily Bitcoin Price Prediction',
   description:
     'Automated daily Bitcoin price predictions using Gemini AI and advanced technical analysis',
 };

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, Brain, Target, BarChart3 } from 'lucide-react';
+import { LivePricesSection } from '@/components/live-prices-section';
 
 export default function HomePage() {
   return (
@@ -13,7 +14,9 @@ export default function HomePage() {
             <div className="w-12 h-12 bg-linear-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
               <TrendingUp className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white">BTC Predictor</h1>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white">
+              Business Dashboard
+            </h1>
           </div>
           <p className="text-lg sm:text-xl text-gray-300 mb-2">
             AI-Powered Bitcoin Price Prediction
@@ -22,6 +25,9 @@ export default function HomePage() {
             Powered by Gemini 2.5 Flash & Advanced Technical Analysis
           </p>
         </div>
+
+        {/* Live Prices Section */}
+        <LivePricesSection />
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">

@@ -67,7 +67,7 @@ export default function Navigation() {
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent hidden sm:block">
-              BTC Predictor
+              Business Dashboard
             </span>
           </Link>
 
@@ -93,8 +93,8 @@ export default function Navigation() {
                       isDisabled
                         ? 'text-gray-600 cursor-not-allowed opacity-50'
                         : isActive
-                        ? 'text-white'
-                        : 'text-gray-400 hover:text-white hover:bg-slate-800/50'
+                          ? 'text-white'
+                          : 'text-gray-400 hover:text-white hover:bg-slate-800/50'
                     )}
                   >
                     <Icon className="w-4 h-4" />
