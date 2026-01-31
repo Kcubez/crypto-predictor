@@ -6,22 +6,22 @@ import { LivePricesSection } from '@/components/live-prices-section';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-purple-950 to-slate-950 p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-linear-to-br from-slate-950 via-purple-950 to-slate-950 p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12 pt-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-linear-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-7 h-7 text-white" />
+        <div className="text-center mb-8 sm:mb-12 pt-4 sm:pt-8">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-linear-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
               Business Dashboard
             </h1>
           </div>
-          <p className="text-lg sm:text-xl text-gray-300 mb-2">
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-1 sm:mb-2">
             AI-Powered Bitcoin Price Prediction
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-xs sm:text-sm text-gray-400">
             Powered by Gemini 2.5 Flash & Advanced Technical Analysis
           </p>
         </div>
@@ -30,15 +30,15 @@ export default function HomePage() {
         <LivePricesSection />
 
         {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12">
           <Card className="bg-linear-to-br from-slate-900/80 to-purple-900/30 border-purple-500/30 backdrop-blur-sm">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6">
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mb-4">
-                  <Brain className="w-8 h-8 text-purple-400" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-purple-500/20 rounded-full flex items-center justify-center mb-3 sm:mb-4">
+                  <Brain className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">AI-Powered</h3>
-                <p className="text-gray-400 text-sm">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">AI-Powered</h3>
+                <p className="text-gray-400 text-xs sm:text-sm">
                   Advanced machine learning algorithms analyze 1000+ days of historical data
                 </p>
               </div>
@@ -46,27 +46,31 @@ export default function HomePage() {
           </Card>
 
           <Card className="bg-linear-to-br from-slate-900/80 to-blue-900/30 border-blue-500/30 backdrop-blur-sm">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6">
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
-                  <BarChart3 className="w-8 h-8 text-blue-400" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-500/20 rounded-full flex items-center justify-center mb-3 sm:mb-4">
+                  <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">Technical Analysis</h3>
-                <p className="text-gray-400 text-sm">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">
+                  Technical Analysis
+                </h3>
+                <p className="text-gray-400 text-xs sm:text-sm">
                   RSI, MACD, Bollinger Bands, Fibonacci levels, and more
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-linear-to-br from-slate-900/80 to-green-900/30 border-green-500/30 backdrop-blur-sm">
-            <CardContent className="pt-6">
+          <Card className="bg-linear-to-br from-slate-900/80 to-green-900/30 border-green-500/30 backdrop-blur-sm sm:col-span-2 md:col-span-1">
+            <CardContent className="pt-4 sm:pt-6">
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4">
-                  <Target className="w-8 h-8 text-green-400" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-3 sm:mb-4">
+                  <Target className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">Trading Signals</h3>
-                <p className="text-gray-400 text-sm">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">
+                  Trading Signals
+                </h3>
+                <p className="text-gray-400 text-xs sm:text-sm">
                   Get BUY/SELL/HOLD recommendations with entry zones and targets
                 </p>
               </div>
@@ -77,25 +81,25 @@ export default function HomePage() {
         {/* CTA */}
         <div className="text-center">
           <Card className="bg-linear-to-br from-slate-900/80 to-purple-900/40 border-purple-500/40 backdrop-blur-sm max-w-2xl mx-auto">
-            <CardContent className="pt-8 pb-8">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+            <CardContent className="pt-6 sm:pt-8 pb-6 sm:pb-8 px-4 sm:px-6">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4">
                 Ready to Predict Bitcoin's Future?
               </h2>
-              <p className="text-gray-300 mb-6">
+              <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6">
                 Get AI-powered daily price predictions with detailed analysis and trading
                 recommendations
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/predict">
-                  <Button className="bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-6 text-lg font-semibold">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                <Link href="/predict" className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-semibold">
                     Start Prediction
-                    <TrendingUp className="ml-2 w-5 h-5" />
+                    <TrendingUp className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                   </Button>
                 </Link>
-                <Link href="/history">
-                  <Button className="bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-6 text-lg font-semibold">
+                <Link href="/history" className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-semibold">
                     View History
-                    <BarChart3 className="ml-2 w-5 h-5" />
+                    <BarChart3 className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                   </Button>
                 </Link>
               </div>

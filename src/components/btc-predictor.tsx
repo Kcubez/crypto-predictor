@@ -23,27 +23,10 @@ import {
 // import { fetchBTCPrice, FALLBACK_BTC_PRICE } from "@/lib/btc-api";
 // CoinMarketCap API (free tier doesn't support historical endpoint)
 // import { fetchBTCHistoricalFromCMC, Candlestick } from "@/lib/coinmarketcap-api";
-import {
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  RefreshCw,
-  ArrowLeft,
-  Settings,
-  Calendar,
-} from 'lucide-react';
-import Link from 'next/link';
+import { TrendingUp, TrendingDown, Activity, RefreshCw } from 'lucide-react';
 import { PredictionTracker, PredictionTracking } from '@/lib/prediction-tracker';
 import { PredictionTrackingCard } from './prediction-tracking-card';
 import { usePrediction } from '@/contexts/prediction-context';
-import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 
 export function BTCPredictor() {
   const { setIsPredicting } = usePrediction();
@@ -59,9 +42,6 @@ export function BTCPredictor() {
   const [trackingData, setTrackingData] = useState<PredictionTracking | null>(null);
   const [countdown, setCountdown] = useState(240); // 4 minutes = 240 seconds
   const [aiOverloadError, setAiOverloadError] = useState(false); // Track AI overload
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [tempApiKey, setTempApiKey] = useState('');
   const [isAdmin, setIsAdmin] = useState(false); // Check if user is admin
 
   const tracker = new PredictionTracker();
@@ -424,46 +404,15 @@ export function BTCPredictor() {
               <p className="text-xs sm:text-sm text-purple-300">Powered by MOT</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-xs text-gray-400">Last Updated</p>
-              <p className="text-sm text-purple-300">
-                {lastUpdated.toLocaleTimeString(undefined, {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                })}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link href="/history">
-                <Button
-                  variant="outline"
-                  className="border-purple-500/30 hover:bg-purple-500/10 text-purple-300 hover:text-purple-200"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  View History
-                </Button>
-              </Link>
-              <Button
-                onClick={() => setShowApiKeyModal(true)}
-                variant="outline"
-                size="icon"
-                className="border-purple-500/30 hover:bg-purple-500/10"
-                title="API Key Settings"
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
-              <Button
-                onClick={fetchPrice}
-                disabled={isLoadingPrice}
-                variant="outline"
-                size="icon"
-                className="border-purple-500/30 hover:bg-purple-500/10"
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoadingPrice ? 'animate-spin' : ''}`} />
-              </Button>
-            </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-400">Last Updated</p>
+            <p className="text-sm text-purple-300">
+              {lastUpdated.toLocaleTimeString(undefined, {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+              })}
+            </p>
           </div>
         </div>
 
@@ -514,23 +463,12 @@ export function BTCPredictor() {
               <div className="text-center">
                 <h3 className="text-xl font-bold text-red-400 mb-2">⚠️ AI Service Overloaded</h3>
                 <p className="text-gray-300 mb-4">
-                  The Gemini AI service is currently experiencing high demand or your API key quota
-                  is exceeded.
+                  The Gemini AI service is currently experiencing high demand.
                 </p>
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-400">
-                    Option 1: Click "Clear Price Prediction" below, wait 30 seconds, then try again.
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    Option 2: Change your API key by clicking the ⚙️ settings button above.
-                  </p>
-                  <Button
-                    onClick={() => setShowApiKeyModal(true)}
-                    className="mt-4 bg-purple-600 hover:bg-purple-700"
-                  >
-                    ⚙️ Change API Key
-                  </Button>
-                </div>
+                <p className="text-sm text-gray-400">
+                  Please wait a moment and try again later. The daily auto-prediction will run at
+                  6:30 AM Myanmar time.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -547,58 +485,6 @@ export function BTCPredictor() {
           </div>
         )}
       </div>
-
-      {/* API Key Settings Modal */}
-      <Dialog open={showApiKeyModal} onOpenChange={setShowApiKeyModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>⚙️ API Key Settings</DialogTitle>
-            <DialogDescription>
-              Enter your Gemini API key to use for predictions. This will be stored in your
-              browser's localStorage.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <div>
-              <label className="text-sm text-gray-400 mb-2 block">Gemini API Key</label>
-              <Input
-                type="password"
-                placeholder="Enter your API key..."
-                value={tempApiKey}
-                onChange={e => setTempApiKey(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowApiKeyModal(false);
-                  setTempApiKey('');
-                }}
-                className="border-slate-700"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  if (tempApiKey.trim()) {
-                    localStorage.setItem('gemini_api_key', tempApiKey.trim());
-                    setApiKey(tempApiKey.trim());
-                    setShowApiKeyModal(false);
-                    setTempApiKey('');
-                    setAiOverloadError(false);
-                    alert('API Key saved successfully! You can now run predictions.');
-                  }
-                }}
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                Save API Key
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

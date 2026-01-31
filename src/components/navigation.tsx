@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { TrendingUp, History, Home, LogOut, User, Settings } from 'lucide-react';
+import { TrendingUp, History, Home, LogOut, User, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { usePrediction } from '@/contexts/prediction-context';
@@ -46,11 +46,9 @@ export default function Navigation() {
     { href: '/history', label: 'History', icon: History },
   ];
 
-  // Add admin link if user is admin
+  // Add admin links if user is admin
   const adminLinks =
-    user?.role === 'admin'
-      ? [{ href: '/admin/predict', label: 'Admin Predict', icon: Settings }]
-      : [];
+    user?.role === 'admin' ? [{ href: '/admin/users', label: 'Users', icon: Users }] : [];
 
   const allLinks = [...links, ...adminLinks];
 
@@ -59,21 +57,21 @@ export default function Navigation() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-linear-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/50">
-              <TrendingUp className="w-6 h-6 text-white" />
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-linear-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/50">
+              <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
             </div>
-            <span className="text-xl font-bold bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent hidden sm:block">
+            <span className="text-lg sm:text-xl font-bold bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent hidden sm:block">
               Business Dashboard
             </span>
           </Link>
 
           {/* Navigation Links - Hidden on login page */}
           {!isLoginPage && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5 sm:gap-1">
               {allLinks.map(link => {
                 const Icon = link.icon;
                 const isActive = pathname === link.href;
@@ -89,7 +87,7 @@ export default function Navigation() {
                       }
                     }}
                     className={cn(
-                      'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all relative',
+                      'flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg font-medium transition-all relative text-sm sm:text-base',
                       isDisabled
                         ? 'text-gray-600 cursor-not-allowed opacity-50'
                         : isActive
@@ -108,10 +106,10 @@ export default function Navigation() {
 
               {/* User Menu */}
               {!loading && user && (
-                <div className="flex items-center gap-2 ml-4 pl-4 border-l border-slate-700">
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 rounded-lg">
+                <div className="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4 pl-2 sm:pl-4 border-l border-slate-700">
+                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 rounded-lg">
                     <User className="w-4 h-4 text-purple-400" />
-                    <span className="text-sm text-gray-300 hidden md:inline">
+                    <span className="text-sm text-gray-300 hidden lg:inline">
                       {user.name || user.email}
                     </span>
                     {user.role === 'admin' && (
@@ -122,11 +120,11 @@ export default function Navigation() {
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-red-500/10 rounded-lg transition-all"
+                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-gray-400 hover:text-white hover:bg-red-500/10 rounded-lg transition-all"
                     title="Logout"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span className="hidden sm:inline text-sm">Logout</span>
+                    <span className="hidden md:inline text-sm">Logout</span>
                   </button>
                 </div>
               )}

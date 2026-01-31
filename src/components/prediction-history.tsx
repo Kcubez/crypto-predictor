@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Calendar,
@@ -13,7 +12,6 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  RefreshCw,
   Sparkles,
 } from 'lucide-react';
 
@@ -45,26 +43,10 @@ export default function PredictionHistory() {
   const [stats, setStats] = useState<AccuracyStats | null>(null);
   const [filter, setFilter] = useState<'7days' | '1month' | 'all'>('7days');
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [clearing, setClearing] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     fetchHistory();
-    fetchUserRole();
   }, [filter]);
-
-  const fetchUserRole = async () => {
-    try {
-      const response = await fetch('/api/auth/me');
-      const data = await response.json();
-      if (data.user) {
-        setIsAdmin(data.user.role === 'admin');
-      }
-    } catch (error) {
-      console.error('Error fetching user role:', error);
-    }
-  };
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -80,57 +62,6 @@ export default function PredictionHistory() {
       console.error('Error fetching history:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchHistory();
-    setRefreshing(false);
-  };
-
-  const handleClearHistory = async () => {
-    if (!isAdmin) {
-      alert('Only administrators can clear prediction history.');
-      return;
-    }
-
-    if (
-      !confirm(
-        'Are you sure you want to delete ALL prediction history for ALL users? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
-
-    setClearing(true);
-    try {
-      const response = await fetch('/api/predictions/clear', {
-        method: 'DELETE',
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Clear local state
-        setPredictions([]);
-        setStats({
-          totalPredictions: 0,
-          completedPredictions: 0,
-          averageError: 0,
-          accuracy: 0,
-        });
-        alert(
-          `All prediction history has been cleared successfully! (${data.count} predictions deleted)`
-        );
-      } else {
-        alert('Failed to clear history: ' + (data.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Error clearing history:', error);
-      alert('Failed to clear history. Please try again.');
-    } finally {
-      setClearing(false);
     }
   };
 
@@ -190,112 +121,87 @@ export default function PredictionHistory() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-purple-950 to-slate-950 p-4 sm:p-6 md:p-8">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="min-h-screen bg-linear-to-br from-slate-950 via-purple-950 to-slate-950 p-3 sm:p-4 md:p-6 lg:p-8">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-linear-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                <Calendar className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white">Prediction History</h1>
-                <p className="text-sm text-gray-300 mt-1">
-                  Track daily predictions vs actual prices
-                </p>
-              </div>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-linear-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <Calendar className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-              {isAdmin && (
-                <Button
-                  onClick={handleClearHistory}
-                  disabled={clearing || predictions.length === 0}
-                  variant="outline"
-                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
-                  title="Admin only: Clear all predictions for all users"
-                >
-                  {clearing ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                      Clearing...
-                    </>
-                  ) : (
-                    <>
-                      Clear All History
-                      <span className="ml-2 text-xs bg-red-500/20 px-2 py-0.5 rounded">Admin</span>
-                    </>
-                  )}
-                </Button>
-              )}
+            <div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
+                Prediction History
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-300 mt-0.5 sm:mt-1">
+                Track daily predictions vs actual prices
+              </p>
             </div>
           </div>
         </div>
 
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <Card className="bg-linear-to-br from-slate-900/80 to-purple-900/30 border-purple-500/30 hover:border-purple-500/50 transition-all hover:scale-105">
-              <CardContent className="pt-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-6 sm:mb-8">
+            <Card className="bg-linear-to-br from-slate-900/80 to-purple-900/30 border-purple-500/30 hover:border-purple-500/50 transition-all hover:scale-[1.02]">
+              <CardContent className="pt-4 sm:pt-6 pb-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-400 mb-1">Total Predictions</p>
-                    <p className="text-3xl font-bold text-white">{stats.totalPredictions}</p>
+                    <p className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Total</p>
+                    <p className="text-xl sm:text-3xl font-bold text-white">
+                      {stats.totalPredictions}
+                    </p>
                   </div>
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
-                    <Target className="w-6 h-6 text-purple-400" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+                    <Target className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-linear-to-br from-slate-900/80 to-green-900/30 border-green-500/30 hover:border-green-500/50 transition-all hover:scale-105">
-              <CardContent className="pt-6">
+            <Card className="bg-linear-to-br from-slate-900/80 to-green-900/30 border-green-500/30 hover:border-green-500/50 transition-all hover:scale-[1.02]">
+              <CardContent className="pt-4 sm:pt-6 pb-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-400 mb-1">Completed</p>
-                    <p className="text-3xl font-bold text-white">{stats.completedPredictions}</p>
+                    <p className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Completed</p>
+                    <p className="text-xl sm:text-3xl font-bold text-white">
+                      {stats.completedPredictions}
+                    </p>
                   </div>
-                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                    <CheckCircle2 className="w-6 h-6 text-green-400" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-full flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-linear-to-br from-slate-900/80 to-blue-900/30 border-blue-500/30 hover:border-blue-500/50 transition-all hover:scale-105">
-              <CardContent className="pt-6">
+            <Card className="bg-linear-to-br from-slate-900/80 to-blue-900/30 border-blue-500/30 hover:border-blue-500/50 transition-all hover:scale-[1.02]">
+              <CardContent className="pt-4 sm:pt-6 pb-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-400 mb-1">Avg Error</p>
-                    <p className="text-3xl font-bold text-white">
+                    <p className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Avg Error</p>
+                    <p className="text-xl sm:text-3xl font-bold text-white">
                       {stats.averageError.toFixed(2)}%
                     </p>
                   </div>
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
-                    <Activity className="w-6 h-6 text-blue-400" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                    <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-linear-to-br from-slate-900/80 to-yellow-900/30 border-yellow-500/30 hover:border-yellow-500/50 transition-all hover:scale-105">
-              <CardContent className="pt-6">
+            <Card className="bg-linear-to-br from-slate-900/80 to-yellow-900/30 border-yellow-500/30 hover:border-yellow-500/50 transition-all hover:scale-[1.02]">
+              <CardContent className="pt-4 sm:pt-6 pb-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-400 mb-1">Accuracy</p>
-                    <p className="text-3xl font-bold text-white">{stats.accuracy.toFixed(1)}%</p>
+                    <p className="text-xs sm:text-sm text-gray-400 mb-0.5 sm:mb-1">Accuracy</p>
+                    <p className="text-xl sm:text-3xl font-bold text-white">
+                      {stats.accuracy.toFixed(1)}%
+                    </p>
                   </div>
-                  <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-yellow-400" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
                   </div>
                 </div>
               </CardContent>
