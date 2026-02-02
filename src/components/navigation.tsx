@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { TrendingUp, History, Home, LogOut, User, Users } from 'lucide-react';
+import { TrendingUp, History, LogOut, User, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { usePrediction } from '@/contexts/prediction-context';
@@ -41,8 +41,7 @@ export default function Navigation() {
   };
 
   const links = [
-    { href: '/', label: 'Home', icon: Home },
-    { href: '/predict', label: 'Predict', icon: TrendingUp },
+    { href: '/predict', label: 'Dashboard', icon: TrendingUp },
     { href: '/history', label: 'History', icon: History },
   ];
 
@@ -75,7 +74,7 @@ export default function Navigation() {
               {allLinks.map(link => {
                 const Icon = link.icon;
                 const isActive = pathname === link.href;
-                const isDisabled = isPredicting && (link.href === '/' || link.href === '/history');
+                const isDisabled = isPredicting && link.href === '/history';
 
                 return (
                   <Link

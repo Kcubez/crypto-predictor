@@ -91,12 +91,17 @@ export default function AdminUsersPage() {
     fetchUsers();
   }, [currentUser]);
 
-  // Filter users by search term
-  const filteredUsers = users.filter(
-    user =>
+  // Filter tab state
+  const [filterTab, setFilterTab] = useState<'all' | 'admin' | 'user'>('all');
+
+  // Filter users by search term and role
+  const filteredUsers = users.filter(user => {
+    const matchesSearch =
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+      (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesRole = filterTab === 'all' || user.role === filterTab;
+    return matchesSearch && matchesRole;
+  });
 
   // Reset form
   const resetForm = () => {
@@ -265,6 +270,64 @@ export default function AdminUsersPage() {
           </Button>
         </div>
 
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <button
+            onClick={() => setFilterTab('all')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filterTab === 'all'
+                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                : 'bg-slate-800/50 text-slate-400 border border-slate-700 hover:bg-slate-700/50 hover:text-slate-300'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            Total Users
+            <span
+              className={`px-1.5 py-0.5 rounded text-xs ${
+                filterTab === 'all' ? 'bg-purple-500/30' : 'bg-slate-700'
+              }`}
+            >
+              {users.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setFilterTab('admin')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filterTab === 'admin'
+                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                : 'bg-slate-800/50 text-slate-400 border border-slate-700 hover:bg-slate-700/50 hover:text-slate-300'
+            }`}
+          >
+            <Shield className="w-4 h-4" />
+            Admins
+            <span
+              className={`px-1.5 py-0.5 rounded text-xs ${
+                filterTab === 'admin' ? 'bg-purple-500/30' : 'bg-slate-700'
+              }`}
+            >
+              {users.filter(u => u.role === 'admin').length}
+            </span>
+          </button>
+          <button
+            onClick={() => setFilterTab('user')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              filterTab === 'user'
+                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                : 'bg-slate-800/50 text-slate-400 border border-slate-700 hover:bg-slate-700/50 hover:text-slate-300'
+            }`}
+          >
+            <UserIcon className="w-4 h-4" />
+            Regular Users
+            <span
+              className={`px-1.5 py-0.5 rounded text-xs ${
+                filterTab === 'user' ? 'bg-purple-500/30' : 'bg-slate-700'
+              }`}
+            >
+              {users.filter(u => u.role === 'user').length}
+            </span>
+          </button>
+        </div>
+
         {/* Search */}
         <div className="relative mb-4 sm:mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -380,26 +443,6 @@ export default function AdminUsersPage() {
                 )}
               </tbody>
             </table>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="mt-6 flex flex-wrap gap-4">
-          <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl px-4 py-3">
-            <p className="text-sm text-slate-400">Total Users</p>
-            <p className="text-2xl font-bold text-white">{users.length}</p>
-          </div>
-          <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl px-4 py-3">
-            <p className="text-sm text-slate-400">Admins</p>
-            <p className="text-2xl font-bold text-purple-400">
-              {users.filter(u => u.role === 'admin').length}
-            </p>
-          </div>
-          <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-xl px-4 py-3">
-            <p className="text-sm text-slate-400">Regular Users</p>
-            <p className="text-2xl font-bold text-slate-300">
-              {users.filter(u => u.role === 'user').length}
-            </p>
           </div>
         </div>
       </div>

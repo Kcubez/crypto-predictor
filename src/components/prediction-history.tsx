@@ -13,6 +13,8 @@ import {
   Clock,
   AlertCircle,
   Sparkles,
+  Brain,
+  BarChart3,
 } from 'lucide-react';
 
 interface PredictionRecord {
@@ -122,7 +124,7 @@ export default function PredictionHistory() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-purple-950 to-slate-950 p-3 sm:p-4 md:p-6 lg:p-8">
-      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-7xl">
+      <div className="container mx-auto px-2 sm:px-4 pt-4 sm:pt-8 max-w-7xl">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-2 sm:gap-3 mb-4">
@@ -361,6 +363,36 @@ export default function PredictionHistory() {
             ))}
           </div>
         )}
+
+        {/* Professional Footer */}
+        <div className="mt-16 pt-6 border-t border-slate-800">
+          {/* Feature Highlights - Compact */}
+          <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 mb-6">
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <Brain className="w-4 h-4 text-purple-400" />
+              <span>AI-Powered Analysis</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <BarChart3 className="w-4 h-4 text-blue-400" />
+              <span>Technical Indicators</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <Target className="w-4 h-4 text-green-400" />
+              <span>Trading Signals</span>
+            </div>
+          </div>
+
+          {/* Disclaimer */}
+          <div className="text-center pb-2">
+            <p className="text-xs sm:text-sm text-gray-500">
+              Disclaimer: This tool is for educational purposes only. Always do your own research
+              before making investment decisions.
+            </p>
+            <p className="text-xs text-gray-600 mt-2">
+              Powered by Gemini 2.5 Flash & Advanced Technical Analysis
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
