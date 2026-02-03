@@ -43,8 +43,8 @@ export default function Navigation() {
 
   const links = [
     { href: '/predict?tab=crypto', label: 'Crypto', icon: Bitcoin },
-    { href: '/predict?tab=currency', label: 'Currency', icon: Coins },
     { href: '/history', label: 'History', icon: History },
+    { href: '/predict?tab=currency', label: 'Currency', icon: Coins },
   ];
 
   // Add admin links if user is admin

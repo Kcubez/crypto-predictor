@@ -389,7 +389,7 @@ export default function PredictionHistory() {
               before making investment decisions.
             </p>
             <p className="text-xs text-gray-600 mt-2">
-              Powered by Gemini 2.5 Flash & Advanced Technical Analysis
+              Powered by MOT & Advanced Technical Analysis
             </p>
           </div>
         </div>

@@ -102,7 +102,7 @@ export function CurrencyRateCard({ showRefreshButton = true }: CurrencyRateCardP
             <h2 className="text-lg sm:text-xl font-semibold text-white mb-1">
               USD/MMK Exchange Rate
             </h2>
-            <p className="text-sm text-slate-400">Official Rate from ExchangeRate API</p>
+            <p className="text-sm text-slate-400">Official Rate</p>
           </div>
 
           {/* Main Rate Display */}
@@ -156,8 +156,7 @@ export function CurrencyRateCard({ showRefreshButton = true }: CurrencyRateCardP
                 <span className="text-sm font-medium text-white">Data Source</span>
               </div>
               <p className="text-xs text-slate-400">
-                Official exchange rate from ExchangeRate API. Data is updated regularly to provide
-                accurate rates.
+                Data is updated regularly to provide accurate rates.
               </p>
             </div>
             <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
@@ -168,7 +167,7 @@ export function CurrencyRateCard({ showRefreshButton = true }: CurrencyRateCardP
                 <span className="text-sm font-medium text-white">Note</span>
               </div>
               <p className="text-xs text-slate-400">
-                This is the official rate. Actual market rates and informal exchange rates may vary.
+                Actual market rates and informal exchange rates may vary.
               </p>
             </div>
           </div>

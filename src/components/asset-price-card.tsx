@@ -207,9 +207,7 @@ export function AssetPriceCard({
         <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-700/50 bg-slate-800/30">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50" />
-            <span className="text-xs sm:text-sm text-slate-400 font-medium">
-              Live Prices from Binance
-            </span>
+            <span className="text-xs sm:text-sm text-slate-400 font-medium">Live Prices</span>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <span className="text-xs text-slate-500">
