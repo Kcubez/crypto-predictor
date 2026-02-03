@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { TrendingUp, History, LogOut, User, Users } from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { TrendingUp, History, LogOut, User, Users, Bitcoin, Coins } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { usePrediction } from '@/contexts/prediction-context';
@@ -13,6 +13,7 @@ export default function Navigation() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { isPredicting } = usePrediction();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     // Fetch current user
@@ -41,7 +42,8 @@ export default function Navigation() {
   };
 
   const links = [
-    { href: '/predict', label: 'Dashboard', icon: TrendingUp },
+    { href: '/predict?tab=crypto', label: 'Crypto', icon: Bitcoin },
+    { href: '/predict?tab=currency', label: 'Currency', icon: Coins },
     { href: '/history', label: 'History', icon: History },
   ];
 
@@ -73,7 +75,11 @@ export default function Navigation() {
             <div className="flex items-center gap-0.5 sm:gap-1">
               {allLinks.map(link => {
                 const Icon = link.icon;
-                const isActive = pathname === link.href;
+                // Check if current link is active based on pathname and query params
+                const currentTab = searchParams.get('tab') || 'crypto';
+                const isActive = link.href.includes('?tab=')
+                  ? pathname === '/predict' && link.href.includes(`tab=${currentTab}`)
+                  : pathname === link.href;
                 const isDisabled = isPredicting && link.href === '/history';
 
                 return (

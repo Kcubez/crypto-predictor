@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Navigation from '@/components/navigation';
@@ -29,7 +30,13 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <PredictionProvider>
-          <Navigation />
+          <Suspense
+            fallback={
+              <nav className="fixed top-0 left-0 right-0 z-50 h-14 sm:h-16 bg-slate-900/95 backdrop-blur-md border-b border-slate-800" />
+            }
+          >
+            <Navigation />
+          </Suspense>
           <div className="pt-16">{children}</div>
         </PredictionProvider>
       </body>

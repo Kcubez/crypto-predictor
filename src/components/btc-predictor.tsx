@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { AIRecommendation } from './ai-recommendation';
 import { MarketContext } from './market-context';
 import { LoadingSpinner } from './loading-spinner';
 import { AssetPriceCard } from './asset-price-card';
+import { CurrencyRateCard } from './currency-rate-card';
 import { generatePriceSimulation, SimulationData } from '@/lib/price-simulator';
 // Using Binance API for everything (current price + historical data)
 import {
@@ -31,6 +33,8 @@ import {
   Brain,
   BarChart3,
   Target,
+  Bitcoin,
+  Coins,
 } from 'lucide-react';
 import { PredictionTracker, PredictionTracking } from '@/lib/prediction-tracker';
 import { PredictionTrackingCard } from './prediction-tracking-card';
@@ -53,6 +57,23 @@ export function BTCPredictor() {
   const [isAdmin, setIsAdmin] = useState(false); // Check if user is admin
 
   const tracker = new PredictionTracker();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<string>('crypto');
+
+  // Sync tab with URL query params
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'crypto' || tabParam === 'currency') {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    router.push(`/predict?tab=${value}`, { scroll: false });
+  };
 
   // Load latest prediction from DATABASE on mount (not localStorage)
   useEffect(() => {
@@ -400,7 +421,7 @@ export function BTCPredictor() {
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-purple-950 to-slate-950 p-4 sm:p-6 md:p-8">
       <div className="container mx-auto px-4 pt-8 max-w-7xl">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center">
               <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -424,74 +445,89 @@ export function BTCPredictor() {
           </div>
         </div>
 
-        {/* Live Asset Prices - BTC and Gold */}
-        <div className="mb-6">
-          <AssetPriceCard assets={['BTC', 'GOLD']} showRefreshButton={true} />
-        </div>
+        {/* Tabs for Crypto and Currency - Controlled by navigation URL params */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          {/* TabsList hidden - navigation handles tab switching */}
 
-        {/* Price Chart - Only show when prediction exists */}
-        {simulationData && (
-          <Card className="mb-6 bg-slate-900/50 border-purple-500/20 backdrop-blur-sm">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-white">Historical Price Data</CardTitle>
-                <Button
-                  onClick={fetchHistoricalData}
-                  disabled={isLoadingHistory}
-                  variant="outline"
-                  size="icon"
-                  className="border-purple-500/30 hover:bg-purple-500/10"
-                  title="Refresh Historical Data"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isLoadingHistory ? 'animate-spin' : ''}`} />
-                </Button>
+          {/* Crypto Tab Content */}
+          <TabsContent value="crypto" className="mt-0">
+            {/* Live Asset Prices - BTC and Gold (without MMK) */}
+            <div className="mb-6">
+              <AssetPriceCard assets={['BTC', 'GOLD']} showRefreshButton={true} showMMK={false} />
+            </div>
+
+            {/* Price Chart - Only show when prediction exists */}
+            {simulationData && (
+              <Card className="mb-6 bg-slate-900/50 border-purple-500/20 backdrop-blur-sm">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-white">Historical Price Data</CardTitle>
+                    <Button
+                      onClick={fetchHistoricalData}
+                      disabled={isLoadingHistory}
+                      variant="outline"
+                      size="icon"
+                      className="border-purple-500/30 hover:bg-purple-500/10"
+                      title="Refresh Historical Data"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${isLoadingHistory ? 'animate-spin' : ''}`} />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <PriceChart data={simulationData.chartData} timeframe={timeframe} />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* AI Recommendation */}
+            {simulationData && (
+              <AIRecommendation
+                recommendation={simulationData.recommendation}
+                priceChange={priceChange}
+              />
+            )}
+
+            {/* Market Context */}
+            {simulationData && <MarketContext context={simulationData.marketContext} />}
+
+            {/* AI Overload Error Message */}
+            {aiOverloadError && (
+              <Card className="mb-6 bg-red-900/20 border-red-500/30 backdrop-blur-sm">
+                <CardContent className="py-6">
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-red-400 mb-2">
+                      ⚠️ AI Service Overloaded
+                    </h3>
+                    <p className="text-gray-300 mb-4">
+                      The Gemini AI service is currently experiencing high demand.
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      Please wait a moment and try again later. The daily auto-prediction will run
+                      at 6:30 AM Myanmar time.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Prediction Tracking Card */}
+            {trackingData && (
+              <div className="mt-8 mb-6">
+                <PredictionTrackingCard
+                  tracking={trackingData}
+                  overallAccuracy={tracker.calculateOverallAccuracy(trackingData)}
+                  completionStatus={tracker.getCompletionStatus(trackingData)}
+                />
               </div>
-            </CardHeader>
-            <CardContent>
-              <PriceChart data={simulationData.chartData} timeframe={timeframe} />
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </TabsContent>
 
-        {/* AI Recommendation */}
-        {simulationData && (
-          <AIRecommendation
-            recommendation={simulationData.recommendation}
-            priceChange={priceChange}
-          />
-        )}
-
-        {/* Market Context */}
-        {simulationData && <MarketContext context={simulationData.marketContext} />}
-
-        {/* AI Overload Error Message */}
-        {aiOverloadError && (
-          <Card className="mb-6 bg-red-900/20 border-red-500/30 backdrop-blur-sm">
-            <CardContent className="py-6">
-              <div className="text-center">
-                <h3 className="text-xl font-bold text-red-400 mb-2">⚠️ AI Service Overloaded</h3>
-                <p className="text-gray-300 mb-4">
-                  The Gemini AI service is currently experiencing high demand.
-                </p>
-                <p className="text-sm text-gray-400">
-                  Please wait a moment and try again later. The daily auto-prediction will run at
-                  6:30 AM Myanmar time.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Prediction Tracking Card */}
-        {trackingData && (
-          <div className="mt-8 mb-6">
-            <PredictionTrackingCard
-              tracking={trackingData}
-              overallAccuracy={tracker.calculateOverallAccuracy(trackingData)}
-              completionStatus={tracker.getCompletionStatus(trackingData)}
-            />
-          </div>
-        )}
+          {/* Currency Tab Content */}
+          <TabsContent value="currency" className="mt-0">
+            <CurrencyRateCard />
+          </TabsContent>
+        </Tabs>
 
         {/* Professional Footer */}
         <div className="mt-16 pt-6 border-t border-slate-800">
